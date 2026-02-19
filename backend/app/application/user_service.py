@@ -18,16 +18,29 @@ class UserService:
     # 2. Создать User
     # 3. Сохранить через repo.save()
     async def register(self, email: str, name: str = "") -> User:
-        raise NotImplementedError("TODO: Реализовать UserService.register")
-
+        # 1. Проверяем, не занят ли email [cite: 42]
+        existing_user = await self.repo.find_by_email(email)
+        if existing_user:
+            raise EmailAlreadyExistsError(email)
+        
+        # 2. Создаем доменную сущность (валидация произойдет внутри User)
+        user = User(email=email, name=name)
+        
+        # 3. Сохраняем в базу через репозиторий [cite: 42]
+        await self.repo.save(user)
+        return user
+    
     # TODO: Реализовать get_by_id(user_id) -> User
     async def get_by_id(self, user_id: uuid.UUID) -> User:
-        raise NotImplementedError("TODO: Реализовать UserService.get_by_id")
-
+        user = await self.repo.find_by_id(user_id)
+        if not user:
+            raise UserNotFoundError(user_id)
+        return user
+    
     # TODO: Реализовать get_by_email(email) -> Optional[User]
     async def get_by_email(self, email: str) -> Optional[User]:
-        raise NotImplementedError("TODO: Реализовать UserService.get_by_email")
-
+        return await self.repo.find_by_email(email)
+    
     # TODO: Реализовать list_users() -> List[User]
     async def list_users(self) -> List[User]:
-        raise NotImplementedError("TODO: Реализовать UserService.list_users")
+        return await self.repo.find_all()

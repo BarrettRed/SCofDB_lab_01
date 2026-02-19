@@ -1,8 +1,9 @@
 """Доменная сущность пользователя."""
 
 import uuid
+import re
 from datetime import datetime
-
+from dataclasses import dataclass, field
 from .exceptions import InvalidEmailError
 
 
@@ -12,5 +13,16 @@ from .exceptions import InvalidEmailError
 # - Реализовать валидацию email в __post_init__
 # - Regex: r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
 
+
+@dataclass
 class User:
-    pass
+    email: str
+    name: str = ""
+    id: uuid.UUID = field(default_factory=uuid.uuid4)
+    created_at: datetime = field(default_factory=datetime.utcnow)
+
+    def __post_init__(self):
+        email_regex = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+        
+        if not self.email or not re.match(email_regex, self.email):
+            raise InvalidEmailError(self.email)
